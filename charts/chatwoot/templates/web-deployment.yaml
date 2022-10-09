@@ -41,8 +41,6 @@ spec:
             - s
             - -p
             - {{ .Values.services.internalPort | quote}}
-            - -b
-            - 0.0.0.0
           command:
             - docker/entrypoints/rails.sh
           env:
