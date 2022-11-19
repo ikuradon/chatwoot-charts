@@ -49,7 +49,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ .Values.postgresql.auth.existingSecret }}
-                key: {{ default "password" .Values.postgresql.auth.existingSecretKey }}
+                key: {{ default "password" .Values.postgresql.auth.secretKeys.adminPasswordKey }}
           {{- end }}
           {{- if .Values.redis.existingSecret }}
           - name: REDIS_PASSWORD
@@ -70,9 +70,18 @@ spec:
           ports:
             - containerPort: {{ int .Values.services.internalPort }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- with .Values.resources }}
+          {{- with .Values.web.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          volumeMounts:
+            - name: cache
+              mountPath: /app/tmp
       serviceAccountName: {{ include "chatwoot.serviceAccountName" . }}
-status: {}
+      {{- if .Values.securityContext }}
+      securityContext: {{ .Values.securityContext | toYaml | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: cache
+          emptyDir: {}
+
